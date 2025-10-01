@@ -1,0 +1,161 @@
+definitions:
+  schemas.Rol:
+    properties:
+      id_rol:
+        type: integer
+      rol:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/roles:
+    get:
+      description: Obtiene un listado completo de roles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/schemas.Rol'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Listar todos los roles
+      tags:
+      - Roles
+    post:
+      consumes:
+      - application/json
+      description: Crea un rol en la base de datos con los datos proporcionados
+      parameters:
+      - description: Datos del rol
+        in: body
+        name: rol
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.Rol'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.Rol'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Crear un nuevo rol
+      tags:
+      - Rolesss
+  /api/v1/roles/{id}:
+    delete:
+      description: Elimina un rol de la base de datos usando su ID
+      parameters:
+      - description: ID del rol
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Eliminar rol
+      tags:
+      - Roles
+    get:
+      description: Obtiene un rol específico usando su ID
+      parameters:
+      - description: ID del rol
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.Rol'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtener rol por ID
+      tags:
+      - Roles
+    put:
+      consumes:
+      - application/json
+      description: Actualiza los datos de un rol existente
+      parameters:
+      - description: ID del rol
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Datos actualizados del rol
+        in: body
+        name: rol
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.Rol'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.Rol'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Actualizar rol
+      tags:
+      - Roles
+swagger: "2.0"
