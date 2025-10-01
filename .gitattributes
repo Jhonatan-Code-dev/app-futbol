@@ -1,3 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+# Ignorar variables de entorno
 .env
+.env.*
+*.env
