@@ -10,7 +10,6 @@ type RolService struct {
 	DB *gorm.DB
 }
 
-// Constructor
 func NewRolService(db *gorm.DB) *RolService {
 	return &RolService{DB: db}
 }
