@@ -55,7 +55,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Rolesss"
+                    "Roles"
                 ],
                 "summary": "Crear un nuevo rol",
                 "parameters": [
@@ -239,6 +239,122 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/usuarios/login": {
+            "post": {
+                "description": "Permite a un usuario autenticarse y obtener un token JWT. Solo usuarios aprobados pueden iniciar sesión.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Login de usuario",
+                "parameters": [
+                    {
+                        "description": "Correo y contraseña",
+                        "name": "credentials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "correo": {
+                                    "type": "string"
+                                },
+                                "password": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Token JWT generado",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Error de parsing del cuerpo",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Usuario no autorizado o contraseña incorrecta",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/usuarios/solicitar": {
+            "post": {
+                "description": "Permite a un usuario enviar una solicitud de registro. La contraseña se encripta y el usuario queda pendiente de aprobación.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Solicitar registro de usuario",
+                "parameters": [
+                    {
+                        "description": "Datos del usuario a registrar",
+                        "name": "usuario",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schemas.Usuario"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Error de parsing del cuerpo",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -250,6 +366,41 @@ const docTemplate = `{
                 },
                 "rol": {
                     "type": "string"
+                }
+            }
+        },
+        "schemas.Usuario": {
+            "type": "object",
+            "properties": {
+                "apellido": {
+                    "type": "string"
+                },
+                "correo": {
+                    "type": "string"
+                },
+                "estado": {
+                    "type": "boolean"
+                },
+                "fecha_aceptacion": {
+                    "type": "string"
+                },
+                "fecha_solicitud": {
+                    "type": "string"
+                },
+                "id_rol": {
+                    "type": "integer"
+                },
+                "id_usuario": {
+                    "type": "integer"
+                },
+                "nombre": {
+                    "type": "string"
+                },
+                "pass": {
+                    "type": "string"
+                },
+                "rol": {
+                    "$ref": "#/definitions/schemas.Rol"
                 }
             }
         }

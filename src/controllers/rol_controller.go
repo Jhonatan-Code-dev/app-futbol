@@ -23,7 +23,7 @@ func NewRolController(service *services.RolService) *RolController {
 // CreateRol crea un nuevo rol
 // @Summary Crear un nuevo rol
 // @Description Crea un rol en la base de datos con los datos proporcionados
-// @Tags Rolesss
+// @Tags Roles
 // @Accept json
 // @Produce json
 // @Param rol body schemas.Rol true "Datos del rol"

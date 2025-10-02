@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// RunMigrations ejecuta AutoMigrate y luego inserta roles iniciales
 func RunMigrations(db *gorm.DB) error {
 	orderedModels := []interface{}{
 		&schemas.Rol{},
@@ -27,6 +28,27 @@ func RunMigrations(db *gorm.DB) error {
 		log.Printf("%s ✅ Migración realizada: %T", time.Now().Format("2006/01/02 15:04:05"), m)
 	}
 
-	log.Printf("%s 🎉 Todas las migraciones se realizaron con éxito", time.Now().Format("2006/01/02 15:04:05"))
+	// Insertar roles iniciales con ID fijo
+	initialRoles := []schemas.Rol{
+		{IdRol: 1, Rol: "Usuario"},
+		{IdRol: 2, Rol: "Admin"},
+	}
+
+	for _, r := range initialRoles {
+		var existing schemas.Rol
+		if err := db.First(&existing, "id_rol = ?", r.IdRol).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				if err := db.Create(&r).Error; err != nil {
+					log.Printf("%s ❌ Error creando rol %v: %v", time.Now().Format("2006/01/02 15:04:05"), r, err)
+					return err
+				}
+				log.Printf("%s ✅ Rol creado: %v", time.Now().Format("2006/01/02 15:04:05"), r)
+			} else {
+				return err
+			}
+		}
+	}
+
+	log.Printf("%s 🎉 Todas las migraciones y seeds se realizaron con éxito", time.Now().Format("2006/01/02 15:04:05"))
 	return nil
 }
