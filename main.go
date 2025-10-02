@@ -20,14 +20,8 @@ func main() {
 	// Inicializar config y JWT
 	cfg := config.GetConfig()
 	middlewares.InitJWT(cfg.JWTSecret)
-
-	// Inicializar DB global
 	database.InitDatabase()
-
-	// Ejecutar migraciones sin pasar db
-	if err := migrations.RunMigrations(); err != nil {
-		log.Fatal("❌ Error ejecutando migraciones:", err)
-	}
+	migrations.RunMigrations()
 
 	app := fiber.New()
 
