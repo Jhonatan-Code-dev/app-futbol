@@ -45,3 +45,7 @@ air init
 para validacion de datos:
 
 go get github.com/go-playground/validator/v10
+
+
+
+quiero agregar FX o Wire
