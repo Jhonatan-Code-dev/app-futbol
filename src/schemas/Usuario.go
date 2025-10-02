@@ -4,11 +4,11 @@ import "time"
 
 type Usuario struct {
 	IdUsuario uint   `gorm:"primaryKey;autoIncrement" json:"id_usuario"`
-	IDRol     uint   `gorm:"not null" json:"id_rol"`
-	Nombre    string `gorm:"type:varchar(100);not null" json:"nombre"`
-	Apellido  string `gorm:"type:varchar(100);not null" json:"apellido"`
-	Correo    string `gorm:"type:varchar(255);unique;not null" json:"correo"`
-	Pass      string `gorm:"type:varchar(255);not null" json:"pass"`
+	IDRol     uint   `gorm:"not null" json:"id_rol" validate:"required"`
+	Nombre    string `gorm:"type:varchar(100);not null" json:"nombre" validate:"required,min=2,max=100"`
+	Apellido  string `gorm:"type:varchar(100);not null" json:"apellido" validate:"required,min=2,max=100"`
+	Correo    string `gorm:"type:varchar(255);unique;not null" json:"correo" validate:"required,email,gmail"`
+	Pass      string `gorm:"type:varchar(255);not null" json:"pass" validate:"required,min=6"`
 	Estado    bool   `gorm:"not null" json:"estado"`
 
 	FechaAceptacion time.Time `gorm:"type:datetime;not null" json:"fecha_aceptacion"`

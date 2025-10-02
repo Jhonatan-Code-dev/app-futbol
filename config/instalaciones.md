@@ -41,3 +41,7 @@ go get golang.org/x/crypto/bcrypt
 UTILIZAMOS AIR INIT PARA COMPILAR CODIGO :
 
 air init
+
+para validacion de datos:
+
+go get github.com/go-playground/validator/v10
