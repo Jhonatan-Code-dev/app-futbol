@@ -21,11 +21,13 @@ func main() {
 	cfg := config.GetConfig()
 	middlewares.InitJWT(cfg.JWTSecret)
 
-	// Inicializar base de datos y migraciones
-	database.InitDatabase()
-	migrations.RunMigrations()
+	// Inicializar base de datos
+	db := database.InitDatabase()
 
-	// Inicializar controladores
+	// Ejecutar migraciones con la conexión actual
+	migrations.RunMigrations(db)
+
+	// Inicializar controladores con inyección de la BD
 	controllers := initializer.NewControllers(db)
 
 	// Inicializar servidor Fiber

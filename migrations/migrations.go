@@ -4,16 +4,13 @@ import (
 	"log"
 	"time"
 
-	"app-futbol/database"
 	"app-futbol/src/schemas"
 
 	"gorm.io/gorm"
 )
 
-// RunMigrations ejecuta AutoMigrate y luego inserta roles iniciales usando la DB global
-func RunMigrations() error {
-	db := database.GetDB() // obtenemos la conexión global directamente
-
+// RunMigrations ejecuta AutoMigrate e inserta roles iniciales
+func RunMigrations(db *gorm.DB) error {
 	// Orden de migración de modelos
 	orderedModels := []interface{}{
 		&schemas.Rol{},
