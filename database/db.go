@@ -1,10 +1,10 @@
-// package database
 package database
 
 import (
 	"fmt"
 	"log"
-	"time" // Necesario para configurar el pool de conexiones
+	"sync"
+	"time"
 
 	"app-futbol/config"
 
@@ -12,32 +12,44 @@ import (
 	"gorm.io/gorm"
 )
 
-// NewDatabaseConnection es el provider de fx.
-// Recibe la configuración (*config.Config) y el ciclo de vida (fx.Lifecycle) inyectados por fx.
-func NewDatabaseConnection(cfg *config.Config) (*gorm.DB, error) {
-	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName,
-	)
+var DB *gorm.DB // variable global accesible desde cualquier lado
+var onceDB sync.Once
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Printf("❌ Error al abrir la conexión: %v", err)
-		return nil, err
+// InitDatabase inicializa la conexión solo una vez
+func InitDatabase() *gorm.DB {
+	onceDB.Do(func() {
+		cfg := config.GetConfig() // obtenemos config global
+		dsn := fmt.Sprintf(
+			"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+			cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName,
+		)
+
+		db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+		if err != nil {
+			log.Fatalf("❌ Error al abrir la conexión: %v", err)
+		}
+
+		sqlDB, err := db.DB()
+		if err != nil {
+			log.Fatalf("❌ Error obteniendo SQL DB: %v", err)
+		}
+
+		// Configuración del pool de conexiones
+		sqlDB.SetMaxIdleConns(10)
+		sqlDB.SetMaxOpenConns(100)
+		sqlDB.SetConnMaxLifetime(time.Hour)
+
+		DB = db
+		log.Println("✅ Conexión a la base de datos establecida")
+	})
+
+	return DB
+}
+
+// GetDB retorna la conexión global
+func GetDB() *gorm.DB {
+	if DB == nil {
+		log.Fatal("❌ Base de datos no inicializada. Llama primero a InitDatabase()")
 	}
-
-	// 1. Obtener la conexión SQL subyacente para el pooling y el cierre.
-	sqlDB, err := db.DB()
-	if err != nil {
-		return nil, err
-	}
-
-	// Configuración del pool de conexiones (Buenas prácticas para un servidor)
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(100)
-	sqlDB.SetConnMaxLifetime(time.Hour)
-
-	log.Println("✅ Conexión a la base de datos establecida")
-
-	return db, nil
+	return DB
 }

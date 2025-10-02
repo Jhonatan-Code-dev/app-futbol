@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	"sync"
 
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
@@ -16,15 +17,24 @@ type Config struct {
 	JWTSecret  string `envconfig:"JWT_SECRET" required:"true"`
 }
 
-func NewConfig() (*Config, error) {
-	_ = godotenv.Load()
+var (
+	cfg     *Config
+	onceCfg sync.Once
+)
 
-	cfg := &Config{}
-	if err := envconfig.Process("", cfg); err != nil {
-		log.Printf("❌ Error al cargar la configuración: %v", err)
-		return nil, err
-	}
+// GetConfig devuelve la configuración global (cargada solo una vez)
+func GetConfig() *Config {
+	onceCfg.Do(func() {
+		_ = godotenv.Load() // cargar .env si existe
 
-	log.Printf("✅ Variables de entorno cargadas correctamente")
-	return cfg, nil
+		configInstance := &Config{}
+		if err := envconfig.Process("", configInstance); err != nil {
+			log.Fatalf("❌ Error al cargar la configuración: %v", err)
+		}
+
+		log.Println("✅ Variables de entorno cargadas correctamente")
+		cfg = configInstance
+	})
+
+	return cfg
 }
