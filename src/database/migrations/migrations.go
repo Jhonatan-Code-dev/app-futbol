@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"app-futbol/src/guard"
+	"app-futbol/src/guard/seed"
 	"app-futbol/src/schemas"
 
 	"gorm.io/gorm"
@@ -33,12 +33,12 @@ func RunMigrations(db *gorm.DB) error {
 		log.Printf("%s ✅ Migración realizada: %T", timestamp(), m)
 	}
 
-	if err := guard.SeedRoles(db); err != nil {
+	if err := seed.SeedRoles(db); err != nil {
 		log.Printf("%s ❌ Error en seed de roles: %v", timestamp(), err)
 		return err
 	}
 
-	if err := guard.SeedPermissions(db); err != nil {
+	if err := seed.SeedPermissions(db); err != nil {
 		log.Printf("%s ❌ Error en seed de permisos: %v", timestamp(), err)
 		return err
 	}
