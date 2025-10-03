@@ -18,7 +18,6 @@ func main() {
 	// Inicializar servidor Fiber
 	app := fiber.New()
 
-	// Configurar rutas usando el container
 	routes.SetupRoutes(app, container)
 
 	// Swagger
