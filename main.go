@@ -22,7 +22,6 @@ func main() {
 	// Swagger
 	app.Get("/docs/*", swagger.HandlerDefault)
 
-	// Ruta base
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("¡Hola! La API está funcionando 🚀")
 	})
