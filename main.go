@@ -15,7 +15,6 @@ func main() {
 
 	container := di.InitializeApp()
 
-	// Inicializar servidor Fiber
 	app := fiber.New()
 
 	routes.SetupRoutes(app, container)
