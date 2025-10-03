@@ -67,8 +67,6 @@ func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) error {
 		}
 		return &ValidationError{Errors: errorsMap}
 	}
-
-	// Verificar correo duplicado
 	var existing schemas.Usuario
 	if err := s.DB.Where("correo = ?", usuario.Correo).First(&existing).Error; err == nil {
 		return fmt.Errorf("el correo %s ya está registrado", usuario.Correo)
