@@ -9,14 +9,42 @@ package di
 import (
 	"app-futbol/config"
 	"app-futbol/database"
+	"app-futbol/src/controllers"
+	"app-futbol/src/services"
 	"gorm.io/gorm"
+	"log"
 )
 
-// Injectors from yo.go:
+// Injectors from wire.go:
 
-// Injector que crea la BD lista usando Config
-func InitializeDatabase() *gorm.DB {
+func initializeApp() (*AppContainer, error) {
 	configConfig := config.NewConfig()
 	db := database.NewDatabase(configConfig)
-	return db
+	rolService := services.NewRolService(db)
+	rolController := controllers.NewRolController(rolService)
+	appContainer := &AppContainer{
+		Config:        configConfig,
+		DB:            db,
+		RolService:    rolService,
+		RolController: rolController,
+	}
+	return appContainer, nil
+}
+
+// wire.go:
+
+type AppContainer struct {
+	Config        *config.Config
+	DB            *gorm.DB
+	RolService    *services.RolService
+	RolController *controllers.RolController
+}
+
+// Función pública: la usas en main.go
+func InitializeApp() *AppContainer {
+	container, err := initializeApp()
+	if err != nil {
+		log.Fatalf("❌ Error inicializando dependencias: %v", err)
+	}
+	return container
 }
