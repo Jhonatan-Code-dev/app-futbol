@@ -19,7 +19,6 @@ func main() {
 
 	routes.SetupRoutes(app, container)
 
-	// Swagger
 	app.Get("/docs/*", swagger.HandlerDefault)
 
 	app.Get("/", func(c *fiber.Ctx) error {
