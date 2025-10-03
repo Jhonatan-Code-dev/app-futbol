@@ -7,7 +7,6 @@ import (
 )
 
 func SetupRoutes(app *fiber.App, container *di.AppContainer) {
-
 	rol := container.RolController
 	api := app.Group("/api/v1")
 	roles := api.Group("/roles")
@@ -17,4 +16,8 @@ func SetupRoutes(app *fiber.App, container *di.AppContainer) {
 	roles.Put("/:id", rol.UpdateRol)
 	roles.Delete("/:id", rol.DeleteRol)
 
+	usuario := container.UsuarioController
+	usuarios := api.Group("/usuarios")
+	usuarios.Post("/solicitar", usuario.SolicitarRegistro)
+	usuarios.Post("/login", usuario.Login)
 }

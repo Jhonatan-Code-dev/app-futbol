@@ -20,6 +20,9 @@ type AppContainer struct {
 	DB            *gorm.DB
 	RolService    *services.RolService
 	RolController *controllers.RolController
+
+	UsuarioService    *services.UsuarioService
+	UsuarioController *controllers.UsuarioController
 }
 
 // Función pública: la usas en main.go
@@ -30,7 +33,6 @@ func InitializeApp() *AppContainer {
 	}
 	return container
 }
-
 func initializeApp() (*AppContainer, error) {
 	wire.Build(
 		// Dependencias base
@@ -39,9 +41,11 @@ func initializeApp() (*AppContainer, error) {
 
 		// Services
 		services.NewRolService,
+		services.NewUsuarioService,
 
 		// Controllers
 		controllers.NewRolController,
+		controllers.NewUsuarioController,
 
 		// Construye AppContainer con todo
 		wire.Struct(new(AppContainer), "*"),

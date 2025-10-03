@@ -22,11 +22,15 @@ func initializeApp() (*AppContainer, error) {
 	db := database.NewDatabase(configConfig)
 	rolService := services.NewRolService(db)
 	rolController := controllers.NewRolController(rolService)
+	usuarioService := services.NewUsuarioService(db)
+	usuarioController := controllers.NewUsuarioController(usuarioService)
 	appContainer := &AppContainer{
-		Config:        configConfig,
-		DB:            db,
-		RolService:    rolService,
-		RolController: rolController,
+		Config:            configConfig,
+		DB:                db,
+		RolService:        rolService,
+		RolController:     rolController,
+		UsuarioService:    usuarioService,
+		UsuarioController: usuarioController,
 	}
 	return appContainer, nil
 }
@@ -38,6 +42,9 @@ type AppContainer struct {
 	DB            *gorm.DB
 	RolService    *services.RolService
 	RolController *controllers.RolController
+
+	UsuarioService    *services.UsuarioService
+	UsuarioController *controllers.UsuarioController
 }
 
 // Función pública: la usas en main.go
