@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	// Inyectar dependencias con Wire
+
 	container := di.InitializeApp()
 
 	// Inicializar servidor Fiber
