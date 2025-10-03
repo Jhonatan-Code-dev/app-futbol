@@ -33,9 +33,13 @@ func RunMigrations(db *gorm.DB) error {
 		log.Printf("%s ✅ Migración realizada: %T", timestamp(), m)
 	}
 
-	// Llamar a los seeds
 	if err := guard.SeedRoles(db); err != nil {
 		log.Printf("%s ❌ Error en seed de roles: %v", timestamp(), err)
+		return err
+	}
+
+	if err := guard.SeedPermissions(db); err != nil {
+		log.Printf("%s ❌ Error en seed de permisos: %v", timestamp(), err)
 		return err
 	}
 
