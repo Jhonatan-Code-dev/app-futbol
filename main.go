@@ -26,7 +26,6 @@ func main() {
 		return c.SendString("¡Hola! La API está funcionando 🚀")
 	})
 
-	// Iniciar servidor en el puerto configurado desde container.Config
 	log.Printf("🚀 Servidor iniciado en http://localhost:%s", container.Config.Port)
 	log.Fatal(app.Listen(":" + container.Config.Port))
 }
