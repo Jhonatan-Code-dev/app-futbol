@@ -4,8 +4,9 @@ import (
 	"log"
 
 	_ "app-futbol/docs"
+	"app-futbol/src/database/migrations"
 	"app-futbol/src/di"
-	"app-futbol/src/migrations"
+
 	"app-futbol/src/routes"
 
 	"github.com/gofiber/fiber/v2"
