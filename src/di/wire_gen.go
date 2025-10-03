@@ -7,9 +7,9 @@
 package di
 
 import (
-	"app-futbol/config"
-	"app-futbol/database"
+	"app-futbol/src/config"
 	"app-futbol/src/controllers"
+	"app-futbol/src/database"
 	"app-futbol/src/services"
 	"gorm.io/gorm"
 	"log"

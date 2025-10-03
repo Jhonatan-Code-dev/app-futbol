@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"app-futbol/di"
+	"app-futbol/src/di"
 
 	"github.com/gofiber/fiber/v2"
 )

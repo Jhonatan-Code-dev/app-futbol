@@ -1,11 +1,10 @@
 package database
 
 import (
+	"app-futbol/src/config"
 	"fmt"
 	"log"
 	"time"
-
-	"app-futbol/config"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

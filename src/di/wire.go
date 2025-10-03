@@ -6,9 +6,9 @@ package di
 import (
 	"log"
 
-	"app-futbol/config"
-	"app-futbol/database"
+	"app-futbol/src/config"
 	"app-futbol/src/controllers"
+	"app-futbol/src/database"
 	"app-futbol/src/services"
 
 	"github.com/google/wire"

@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"app-futbol/di"
 	_ "app-futbol/docs"
-	"app-futbol/migrations"
+	"app-futbol/src/di"
+	"app-futbol/src/migrations"
 	"app-futbol/src/routes"
 
 	"github.com/gofiber/fiber/v2"
