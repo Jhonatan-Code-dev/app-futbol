@@ -16,6 +16,7 @@ func main() {
 	container := di.InitializeApp()
 
 	migrations.RunMigrations(container.DB)
+
 	app := fiber.New()
 	routes.SetupRoutes(app, container)
 	app.Get("/docs/*", swagger.HandlerDefault)
