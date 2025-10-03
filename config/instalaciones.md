@@ -49,3 +49,16 @@ go get github.com/go-playground/validator/v10
 
 
 quiero agregar FX o Wire
+
+utilize WIRE:
+para instar 
+go install github.com/google/wire/cmd/wire@latest 
+
+para agregar al projecto:
+go get github.com/google/wire
+
+comando para generar codigo puro de go con wire:
+
+wire ./di ---> se especifica la carpeta y al final obtienes wire_gen.go
+
+

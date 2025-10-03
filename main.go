@@ -3,38 +3,23 @@ package main
 import (
 	"log"
 
+	"app-futbol/di"
 	_ "app-futbol/docs"
-	"app-futbol/migrations"
-	"app-futbol/src/initializer"
-	"app-futbol/src/middlewares"
 	"app-futbol/src/routes"
-
-	"app-futbol/config"
-	"app-futbol/database"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"
 )
 
 func main() {
-	// Inicializar configuración y JWT
-	cfg := config.GetConfig()
-	middlewares.InitJWT(cfg.JWTSecret)
-
-	// Inicializar base de datos
-	db := database.InitDatabase()
-
-	// Ejecutar migraciones con la conexión actual
-	migrations.RunMigrations(db)
-
-	// Inicializar controladores con inyección de la BD
-	controllers := initializer.NewControllers(db)
+	// Inyectar dependencias con Wire
+	container := di.InitializeApp()
 
 	// Inicializar servidor Fiber
 	app := fiber.New()
 
-	// Configurar rutas
-	routes.SetupRoutes(app, controllers)
+	// Configurar rutas usando el container
+	routes.SetupRoutes(app, container)
 
 	// Swagger
 	app.Get("/docs/*", swagger.HandlerDefault)
@@ -44,6 +29,7 @@ func main() {
 		return c.SendString("¡Hola! La API está funcionando 🚀")
 	})
 
-	// Iniciar servidor
-	log.Fatal(app.Listen(":3000"))
+	// Iniciar servidor en el puerto configurado desde container.Config
+	log.Printf("🚀 Servidor iniciado en http://localhost:%s", container.Config.Port)
+	log.Fatal(app.Listen(":" + container.Config.Port))
 }

@@ -11,10 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// InitDatabase inicializa y retorna una nueva conexión a la BD
-func InitDatabase() *gorm.DB {
-	cfg := config.GetConfig()
-
+// NewDatabase es el provider para Wire
+func NewDatabase(cfg *config.Config) *gorm.DB {
 	dsn := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName,
@@ -30,7 +28,6 @@ func InitDatabase() *gorm.DB {
 		log.Fatalf("❌ Error obteniendo SQL DB: %v", err)
 	}
 
-	// Configuración del pool de conexiones
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)

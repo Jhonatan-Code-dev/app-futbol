@@ -2,7 +2,6 @@ package config
 
 import (
 	"log"
-	"sync"
 
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
@@ -15,26 +14,17 @@ type Config struct {
 	DBPassword string `envconfig:"DB_PASSWORD" required:"true"`
 	DBName     string `envconfig:"DB_NAME" required:"true"`
 	JWTSecret  string `envconfig:"JWT_SECRET" required:"true"`
+	Port       string `envconfig:"PORT" required:"true"`
 }
 
-var (
-	cfg     *Config
-	onceCfg sync.Once
-)
+func NewConfig() *Config {
+	_ = godotenv.Load()
 
-// GetConfig devuelve la configuración global (cargada solo una vez)
-func GetConfig() *Config {
-	onceCfg.Do(func() {
-		_ = godotenv.Load() // cargar .env si existe
+	cfg := &Config{}
+	if err := envconfig.Process("", cfg); err != nil {
+		log.Fatalf("❌ Error al cargar la configuración: %v", err)
+	}
 
-		configInstance := &Config{}
-		if err := envconfig.Process("", configInstance); err != nil {
-			log.Fatalf("❌ Error al cargar la configuración: %v", err)
-		}
-
-		log.Println("✅ Variables de entorno cargadas correctamente")
-		cfg = configInstance
-	})
-
+	log.Println("✅ Variables de entorno cargadas correctamente")
 	return cfg
 }
