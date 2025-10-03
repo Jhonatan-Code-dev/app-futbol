@@ -23,5 +23,6 @@ func main() {
 	app.Get("/docs/*", swagger.HandlerDefault)
 
 	log.Printf("🚀 Servidor iniciado en http://localhost:%s", container.Config.Port)
+
 	log.Fatal(app.Listen(":" + container.Config.Port))
 }
