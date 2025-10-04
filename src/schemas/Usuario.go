@@ -4,7 +4,7 @@ import "time"
 
 type Usuario struct {
 	IdUsuario uint   `gorm:"primaryKey;autoIncrement"`
-	IDRol     uint   `gorm:"not null" json:"id_rol"`
+	IDRol     uint   `gorm:"not null"`
 	Nombre    string `gorm:"type:varchar(100);not null"`
 	Apellido  string `gorm:"type:varchar(100);not null"`
 	Correo    string `gorm:"type:varchar(255);unique;not null"`

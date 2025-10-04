@@ -18,8 +18,6 @@ type UsuarioService struct {
 func NewUsuarioService(db *gorm.DB) *UsuarioService {
 	return &UsuarioService{DB: db}
 }
-
-// services/usuario_service.go
 func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) map[string]string {
 	errores := make(map[string]string)
 
@@ -37,11 +35,15 @@ func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) map[string]st
 	}
 
 	if len(errores) > 0 {
-		return errores // retornamos todos los errores
+		return errores
 	}
 
-	// Hash de la contraseña
-	hash, _ := validation.HashPass(usuario.Pass)
+	// Hash contraseña
+	hash, err := validation.HashPass(usuario.Pass)
+	if err != nil {
+		errores["pass"] = "error al generar hash"
+		return errores
+	}
 	usuario.Pass = hash
 
 	// Valores por defecto
@@ -50,9 +52,12 @@ func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) map[string]st
 	usuario.FechaSolicitud = validation.FechaActualPeru()
 
 	// Crear usuario en DB
-	s.DB.Create(usuario)
+	if err := s.DB.Create(usuario).Error; err != nil {
+		errores["db"] = err.Error()
+		return errores
+	}
 
-	return nil // no hay errores
+	return nil
 }
 
 func (s *UsuarioService) Login(correo, pass string) (string, error) {

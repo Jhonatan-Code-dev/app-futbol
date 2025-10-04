@@ -19,6 +19,8 @@ func NewUsuarioController(service *services.UsuarioService) *UsuarioController {
 // controllers/usuario_controller.go
 func (c *UsuarioController) SolicitarRegistro(ctx *fiber.Ctx) error {
 	usuario := new(schemas.Usuario)
+
+	// BodyParser automáticamente mapeará los campos coincidentes
 	if err := ctx.BodyParser(usuario); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
@@ -26,7 +28,7 @@ func (c *UsuarioController) SolicitarRegistro(ctx *fiber.Ctx) error {
 		})
 	}
 
-	// Solo considerar los campos que realmente recibimos
+	// Sobrescribimos solo los campos que queremos aceptar
 	usuario = &schemas.Usuario{
 		Nombre:   usuario.Nombre,
 		Apellido: usuario.Apellido,
@@ -34,6 +36,7 @@ func (c *UsuarioController) SolicitarRegistro(ctx *fiber.Ctx) error {
 		Pass:     usuario.Pass,
 	}
 
+	// Ahora puedes enviar este usuario al service para validar y registrar
 	if errores := c.Service.RequestRegister(usuario); errores != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
