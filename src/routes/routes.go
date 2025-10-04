@@ -19,5 +19,4 @@ func SetupRoutes(app *fiber.App, container *di.AppContainer) {
 	usuario := container.UsuarioController
 	usuarios := api.Group("/usuarios")
 	usuarios.Post("/solicitar", usuario.SolicitarRegistro)
-	usuarios.Post("/login", usuario.Login)
 }
