@@ -3,7 +3,7 @@ package controllers
 import (
 	"app-futbol/src/schemas"
 	"app-futbol/src/services"
-	"errors"
+	"app-futbol/src/validation"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -22,27 +22,36 @@ func (c *UsuarioController) SolicitarRegistro(ctx *fiber.Ctx) error {
 	if err := ctx.BodyParser(&usuario); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"estado": false,
-			"error":  "Datos inválidos: " + err.Error(),
+			"data": fiber.Map{
+				"error": "Datos inválidos: " + err.Error(),
+			},
 		})
 	}
 
 	if err := c.Service.RequestRegister(&usuario); err != nil {
-		var ve *services.ValidationError
-		if errors.As(err, &ve) {
+		// Detectar error de validación (ErrorMap)
+		if em, ok := err.(validation.ErrorMap); ok {
 			return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"estado": false,
-				"errors": ve.Errors,
+				"data": fiber.Map{
+					"errors": em,
+				},
 			})
 		}
+		// Otro tipo de error (DB, lógica, etc.)
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"estado": false,
-			"error":  err.Error(),
+			"data": fiber.Map{
+				"error": err.Error(),
+			},
 		})
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"estado":  true,
-		"mensaje": "Solicitud de registro enviada correctamente",
+		"estado": true,
+		"data": fiber.Map{
+			"mensaje": "Solicitud de registro enviada correctamente",
+		},
 	})
 }
 
@@ -54,13 +63,28 @@ func (c *UsuarioController) Login(ctx *fiber.Ctx) error {
 	}
 
 	if err := ctx.BodyParser(&body); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"estado": false,
+			"data": fiber.Map{
+				"error": "Datos inválidos: " + err.Error(),
+			},
+		})
 	}
 
 	token, err := c.Service.Login(body.Correo, body.Password)
 	if err != nil {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"estado": false,
+			"data": fiber.Map{
+				"error": err.Error(),
+			},
+		})
 	}
 
-	return ctx.JSON(fiber.Map{"token": token})
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"estado": true,
+		"data": fiber.Map{
+			"token": token,
+		},
+	})
 }

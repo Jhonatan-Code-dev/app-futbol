@@ -2,71 +2,40 @@ package services
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"app-futbol/src/middlewares"
 	"app-futbol/src/schemas"
+	"app-futbol/src/validation"
 
-	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
-// ValidationError para manejar errores amigables
-type ValidationError struct {
-	Errors map[string]string `json:"errors"`
-}
-
-func (v *ValidationError) Error() string {
-	return "error de validación"
-}
-
 // UsuarioService maneja la lógica de usuarios
 type UsuarioService struct {
-	DB       *gorm.DB
-	validate *validator.Validate
+	DB        *gorm.DB
+	validator *validation.ValidationService
 }
 
 // Constructor
 func NewUsuarioService(db *gorm.DB) *UsuarioService {
-	validate := validator.New()
-
-	// Validación personalizada para Gmail
-	validate.RegisterValidation("gmail", func(fl validator.FieldLevel) bool {
-		email := fl.Field().String()
-		return strings.HasSuffix(email, "@gmail.com")
-	})
-
 	return &UsuarioService{
-		DB:       db,
-		validate: validate,
+		DB:        db,
+		validator: validation.NewValidationService(),
 	}
 }
 
 // RequestRegister solicita el registro de un usuario
 func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) error {
-	// Validar datos
-	if err := s.validate.Struct(usuario); err != nil {
-		errorsMap := make(map[string]string)
-		for _, e := range err.(validator.ValidationErrors) {
-			switch e.Tag() {
-			case "required":
-				errorsMap[e.Field()] = "es obligatorio"
-			case "min":
-				errorsMap[e.Field()] = fmt.Sprintf("debe tener al menos %s caracteres", e.Param())
-			case "max":
-				errorsMap[e.Field()] = fmt.Sprintf("no debe exceder %s caracteres", e.Param())
-			case "email":
-				errorsMap[e.Field()] = "no es un correo válido"
-			case "gmail":
-				errorsMap[e.Field()] = "solo se permiten correos @gmail.com"
-			default:
-				errorsMap[e.Field()] = fmt.Sprintf("no cumple la regla %s", e.Tag())
-			}
-		}
-		return &ValidationError{Errors: errorsMap}
+	// Validar datos con ValidationService
+	errorsMap := validation.ErrorMap{}
+	if err := s.validator.ValidateStructInto(usuario, errorsMap); err != nil {
+		// Devolver errores amigables en formato JSON
+		return err
 	}
+
+	// Verificar si el correo ya está registrado
 	var existing schemas.Usuario
 	if err := s.DB.Where("correo = ?", usuario.Correo).First(&existing).Error; err == nil {
 		return fmt.Errorf("el correo %s ya está registrado", usuario.Correo)
