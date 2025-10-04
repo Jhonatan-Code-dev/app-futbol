@@ -1,41 +1,29 @@
-// repository/usuario_repository.go
 package repository
 
 import (
+	"context"
 	"errors"
 
 	"app-futbol/src/schemas"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
-type UsuarioRepository struct {
-	DB *gorm.DB
-}
+var ErrCorreoDuplicado = errors.New("usuario: correo ya registrado")
 
-func NewUsuarioRepository(db *gorm.DB) *UsuarioRepository {
-	return &UsuarioRepository{DB: db}
-}
+type UsuarioRepository struct{ DB *gorm.DB }
 
-// Verifica si un correo ya existe y devuelve error si está registrado
-func (r *UsuarioRepository) EnsureCorreoDisponible(correo string) error {
-	var count int64
-	if err := r.DB.Model(&schemas.Usuario{}).
-		Where("correo = ?", correo).
-		Count(&count).Error; err != nil {
+func NewUsuarioRepository(db *gorm.DB) *UsuarioRepository { return &UsuarioRepository{DB: db} }
+
+func (r *UsuarioRepository) Create(ctx context.Context, u *schemas.Usuario) error {
+	if err := r.DB.WithContext(ctx).
+		Clauses(clause.OnConflict{Columns: []clause.Column{{Name: "correo"}}, DoNothing: true}).
+		Create(u).Error; err != nil {
 		return err
 	}
-	if count > 0 {
-		return errors.New("el correo ya está registrado")
+	if r.DB.RowsAffected == 0 {
+		return ErrCorreoDuplicado
 	}
 	return nil
-}
-
-// Crea un nuevo usuario (pero primero asegura que el correo no exista)
-func (r *UsuarioRepository) Create(usuario *schemas.Usuario) error {
-	// Chequeo de correo duplicado
-	if err := r.EnsureCorreoDisponible(usuario.Correo); err != nil {
-		return err
-	}
-	return r.DB.Create(usuario).Error
 }
