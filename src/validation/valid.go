@@ -11,11 +11,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var nameRegex = regexp.MustCompile(`^[A-Za-zÀ-ÖØ-öø-ÿ'’\- ]{2,100}$`)
+// Regex para nombres/apellidos: letras, guiones, apóstrofes, solo un espacio entre palabras, sin espacios al inicio ni final
+var nameRegex = regexp.MustCompile(`^[A-Za-zÀ-ÖØ-öø-ÿ'’\-]+( [A-Za-zÀ-ÖØ-öø-ÿ'’\-]+)*$`)
 
 // ValidarNombreError retorna error si nombre inválido
 func ValidarNombreError(nombre string) error {
-	if !nameRegex.MatchString(strings.TrimSpace(nombre)) {
+	if !nameRegex.MatchString(nombre) {
 		return errors.New("nombre inválido")
 	}
 	return nil
@@ -23,7 +24,7 @@ func ValidarNombreError(nombre string) error {
 
 // ValidarApellidoError retorna error si apellido inválido
 func ValidarApellidoError(apellido string) error {
-	if !nameRegex.MatchString(strings.TrimSpace(apellido)) {
+	if !nameRegex.MatchString(apellido) {
 		return errors.New("apellido inválido")
 	}
 	return nil

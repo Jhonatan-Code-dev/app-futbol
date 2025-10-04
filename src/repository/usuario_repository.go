@@ -9,20 +9,23 @@ import (
 	"gorm.io/gorm"
 )
 
+// ValidarCorreoExistente revisa si el correo ya está registrado.
+// Retorna error si el correo existe o si ocurre un problema, con mensaje seguro.
 func ValidarCorreoExistente(db *gorm.DB, correo string) error {
 	correo = strings.TrimSpace(strings.ToLower(correo))
-	var dummy int64
-	tx := db.Model(&schemas.Usuario{}).
-		Select("1").
-		Where("correo = ?", correo).
-		Limit(1).
-		Scan(&dummy)
+	var exists int64
 
-	if tx.Error != nil {
-		return tx.Error
+	// Verificamos si ya existe
+	if err := db.Model(&schemas.Usuario{}).
+		Where("correo = ?", correo).
+		Count(&exists).Error; err != nil {
+		// Mensaje genérico seguro para errores inesperados
+		return errors.New("error al procesar la solicitud, intente más tarde")
 	}
-	if tx.RowsAffected > 0 {
+
+	if exists > 0 {
 		return errors.New("correo ya registrado")
 	}
+
 	return nil
 }
