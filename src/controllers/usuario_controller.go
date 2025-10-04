@@ -17,11 +17,23 @@ func NewUsuarioController(service *services.UsuarioService) *UsuarioController {
 }
 
 func (c *UsuarioController) SolicitarRegistro(ctx *fiber.Ctx) error {
-	var usuario schemas.Usuario
-	if err := helpers.ParseBody(ctx, &usuario); err != nil {
-		return err
+	usuario := new(schemas.Usuario)
+	if err := ctx.BodyParser(usuario); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": "Datos inválidos",
+		})
 	}
-	return helpers.JsonSuccess(ctx, "Solicitud de registro enviada correctamente")
+	if err := c.Service.RequestRegister(usuario); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false,
+			"message": err.Error(),
+		})
+	}
+	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"success": true,
+		"message": "Usuario registrado correctamente",
+	})
 }
 
 func (c *UsuarioController) Login(ctx *fiber.Ctx) error {
