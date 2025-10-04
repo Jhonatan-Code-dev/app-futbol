@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strings"
 	"unicode/utf8"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 var nameRegex = regexp.MustCompile(`^[A-Za-zÀ-ÖØ-öø-ÿ'’\- ]{2,100}$`)
@@ -26,4 +28,13 @@ func ValidarCorreo(correo string) bool {
 func ValidarPass(pass string) bool {
 	l := utf8.RuneCountInString(pass)
 	return l >= 4 && l <= 10
+}
+
+func HashPass(pass string) (string, error) {
+	h, e := bcrypt.GenerateFromPassword([]byte(pass), 12)
+	return string(h), e
+}
+
+func ComparePass(hash, pass string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(pass)) == nil
 }
