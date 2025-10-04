@@ -1,29 +1,28 @@
 package repository
 
 import (
-	"context"
 	"errors"
+	"strings"
 
 	"app-futbol/src/schemas"
 
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
-var ErrCorreoDuplicado = errors.New("usuario: correo ya registrado")
+func ValidarCorreoExistente(db *gorm.DB, correo string) error {
+	correo = strings.TrimSpace(strings.ToLower(correo))
+	var dummy int64
+	tx := db.Model(&schemas.Usuario{}).
+		Select("1").
+		Where("correo = ?", correo).
+		Limit(1).
+		Scan(&dummy)
 
-type UsuarioRepository struct{ DB *gorm.DB }
-
-func NewUsuarioRepository(db *gorm.DB) *UsuarioRepository { return &UsuarioRepository{DB: db} }
-
-func (r *UsuarioRepository) Create(ctx context.Context, u *schemas.Usuario) error {
-	if err := r.DB.WithContext(ctx).
-		Clauses(clause.OnConflict{Columns: []clause.Column{{Name: "correo"}}, DoNothing: true}).
-		Create(u).Error; err != nil {
-		return err
+	if tx.Error != nil {
+		return tx.Error
 	}
-	if r.DB.RowsAffected == 0 {
-		return ErrCorreoDuplicado
+	if tx.RowsAffected > 0 {
+		return errors.New("correo ya registrado")
 	}
 	return nil
 }

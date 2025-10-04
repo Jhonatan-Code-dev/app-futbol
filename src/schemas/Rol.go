@@ -2,5 +2,5 @@ package schemas
 
 type Rol struct {
 	IdRol uint   `gorm:"primaryKey;autoIncrement"`
-	Rol   string `gorm:"type:varchar(30);unique;not null"`
+	Rol   string `gorm:"size:30;unique;not null"`
 }

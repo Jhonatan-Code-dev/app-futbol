@@ -48,13 +48,12 @@ func ValidarPassError(pass string) error {
 	return nil
 }
 
-func HashPass(pass string, hashOut *string) error {
+func HashPass(pass string) (string, error) {
 	h, err := bcrypt.GenerateFromPassword([]byte(pass), 12)
 	if err != nil {
-		return errors.New("no se pudo generar hash de contraseña")
+		return "", errors.New("no se pudo generar hash de contraseña")
 	}
-	*hashOut = string(h)
-	return nil
+	return string(h), nil
 }
 
 // ComparePass compara pass con hash bcrypt

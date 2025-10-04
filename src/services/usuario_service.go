@@ -2,9 +2,9 @@ package services
 
 import (
 	"fmt"
-	"strings"
 
 	"app-futbol/src/middlewares"
+	"app-futbol/src/repository"
 	"app-futbol/src/schemas"
 	"app-futbol/src/validation"
 
@@ -19,9 +19,9 @@ type UsuarioService struct {
 func NewUsuarioService(db *gorm.DB) *UsuarioService {
 	return &UsuarioService{DB: db}
 }
+
 func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) map[string]string {
 	errores := make(map[string]string)
-
 	if err := validation.ValidarNombreError(usuario.Nombre); err != nil {
 		errores["nombre"] = err.Error()
 	}
@@ -34,21 +34,14 @@ func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) map[string]st
 	if err := validation.ValidarPassError(usuario.Pass); err != nil {
 		errores["pass"] = err.Error()
 	}
-
-	var count int64
-	s.DB.Model(&schemas.Usuario{}).
-		Where("correo = ?", strings.TrimSpace(strings.ToLower(usuario.Correo))).
-		Count(&count)
-	if count > 0 {
-		errores["correo"] = "correo ya registrado"
+	if err := repository.ValidarCorreoExistente(s.DB, usuario.Correo); err != nil {
+		errores["correo"] = err.Error()
 	}
-
-	var hash string
-	if err := validation.HashPass(usuario.Pass, &hash); err != nil {
+	hash, err := validation.HashPass(usuario.Pass)
+	if err != nil {
 		errores["pass"] = err.Error()
 		return errores
 	}
-
 	if len(errores) > 0 {
 		return errores
 	}
