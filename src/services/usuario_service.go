@@ -18,34 +18,41 @@ type UsuarioService struct {
 func NewUsuarioService(db *gorm.DB) *UsuarioService {
 	return &UsuarioService{DB: db}
 }
-func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) error {
+
+// services/usuario_service.go
+func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) map[string]string {
+	errores := make(map[string]string)
+
 	if err := validation.ValidarNombreError(usuario.Nombre); err != nil {
-		return fmt.Errorf("nombre: %s", err.Error())
+		errores["nombre"] = err.Error()
 	}
 	if err := validation.ValidarApellidoError(usuario.Apellido); err != nil {
-		return fmt.Errorf("apellido: %s", err.Error())
+		errores["apellido"] = err.Error()
 	}
 	if err := validation.ValidarCorreoError(usuario.Correo); err != nil {
-		return fmt.Errorf("correo: %s", err.Error())
+		errores["correo"] = err.Error()
 	}
 	if err := validation.ValidarPassError(usuario.Pass); err != nil {
-		return fmt.Errorf("pass: %s", err.Error())
+		errores["pass"] = err.Error()
+	}
+
+	if len(errores) > 0 {
+		return errores // retornamos todos los errores
 	}
 
 	// Hash de la contraseña
-	if hash, err := validation.HashPass(usuario.Pass); err != nil {
-		return err
-	} else {
-		usuario.Pass = hash
-	}
+	hash, _ := validation.HashPass(usuario.Pass)
+	usuario.Pass = hash
 
 	// Valores por defecto
 	usuario.IDRol = 1
 	usuario.Estado = false
 	usuario.FechaSolicitud = validation.FechaActualPeru()
 
-	// Crear usuario
-	return s.DB.Create(usuario).Error
+	// Crear usuario en DB
+	s.DB.Create(usuario)
+
+	return nil // no hay errores
 }
 
 func (s *UsuarioService) Login(correo, pass string) (string, error) {

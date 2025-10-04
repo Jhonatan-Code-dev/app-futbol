@@ -16,6 +16,7 @@ func NewUsuarioController(service *services.UsuarioService) *UsuarioController {
 	return &UsuarioController{Service: service}
 }
 
+// controllers/usuario_controller.go
 func (c *UsuarioController) SolicitarRegistro(ctx *fiber.Ctx) error {
 	usuario := new(schemas.Usuario)
 	if err := ctx.BodyParser(usuario); err != nil {
@@ -24,12 +25,14 @@ func (c *UsuarioController) SolicitarRegistro(ctx *fiber.Ctx) error {
 			"message": "Datos inválidos",
 		})
 	}
-	if err := c.Service.RequestRegister(usuario); err != nil {
+
+	if errores := c.Service.RequestRegister(usuario); errores != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
-			"message": err.Error(),
+			"errores": errores, // aquí salen los campos y sus mensajes
 		})
 	}
+
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"success": true,
 		"message": "Usuario registrado correctamente",
