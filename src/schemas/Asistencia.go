@@ -1,9 +1,9 @@
 package schemas
 
 type Asistencia struct {
-	IdAsistencia uint `gorm:"primaryKey;autoIncrement" json:"id_asistencia"`
-	IDUsuario    uint `gorm:"not null" json:"id_usuario"`
-	IDFecha      uint `gorm:"not null" json:"id_fecha"`
+	IdAsistencia uint `gorm:"primaryKey;autoIncrement"`
+	IDUsuario    uint `gorm:"not null"`
+	IDFecha      uint `gorm:"not null"`
 
 	// Relaciones
 	Usuario Usuario `gorm:"foreignKey:IDUsuario;references:IdUsuario"`
