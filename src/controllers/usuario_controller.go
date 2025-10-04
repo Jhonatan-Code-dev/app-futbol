@@ -22,9 +22,7 @@ func (c *UsuarioController) SolicitarRegistro(ctx *fiber.Ctx) error {
 	if err := ctx.BodyParser(&usuario); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"estado": false,
-			"data": fiber.Map{
-				"error": "Datos inválidos: " + err.Error(),
-			},
+			"error":  "Datos inválidos: " + err.Error(),
 		})
 	}
 
@@ -33,25 +31,19 @@ func (c *UsuarioController) SolicitarRegistro(ctx *fiber.Ctx) error {
 		if em, ok := err.(validation.ErrorMap); ok {
 			return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"estado": false,
-				"data": fiber.Map{
-					"errors": em,
-				},
+				"errors": em,
 			})
 		}
 		// Otro tipo de error (DB, lógica, etc.)
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"estado": false,
-			"data": fiber.Map{
-				"error": err.Error(),
-			},
+			"error":  err.Error(),
 		})
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"estado": true,
-		"data": fiber.Map{
-			"mensaje": "Solicitud de registro enviada correctamente",
-		},
+		"estado":  true,
+		"mensaje": "Solicitud de registro enviada correctamente",
 	})
 }
 
@@ -65,9 +57,7 @@ func (c *UsuarioController) Login(ctx *fiber.Ctx) error {
 	if err := ctx.BodyParser(&body); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"estado": false,
-			"data": fiber.Map{
-				"error": "Datos inválidos: " + err.Error(),
-			},
+			"error":  "Datos inválidos: " + err.Error(),
 		})
 	}
 
@@ -75,16 +65,12 @@ func (c *UsuarioController) Login(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"estado": false,
-			"data": fiber.Map{
-				"error": err.Error(),
-			},
+			"error":  err.Error(),
 		})
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"estado": true,
-		"data": fiber.Map{
-			"token": token,
-		},
+		"token":  token,
 	})
 }
