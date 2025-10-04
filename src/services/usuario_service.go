@@ -6,29 +6,22 @@ import (
 
 	"app-futbol/src/middlewares"
 	"app-futbol/src/schemas"
-	"app-futbol/src/validation"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type UsuarioService struct {
-	DB        *gorm.DB
-	validator *validation.ValidationService
+	DB *gorm.DB
 }
 
 func NewUsuarioService(db *gorm.DB) *UsuarioService {
 	return &UsuarioService{
-		DB:        db,
-		validator: validation.NewValidationService(),
+		DB: db,
 	}
 }
 
 func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) error {
-	errorsMap := validation.ErrorMap{}
-	if err := s.validator.ValidateStructInto(usuario, errorsMap); err != nil {
-		return err
-	}
 
 	var existing schemas.Usuario
 	err := s.DB.Where("correo = ?", usuario.Correo).First(&existing).Error
