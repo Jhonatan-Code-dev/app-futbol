@@ -5,6 +5,7 @@ import (
 	"net/mail"
 	"regexp"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"golang.org/x/crypto/bcrypt"
@@ -56,4 +57,9 @@ func HashPass(pass string) (string, error) {
 // ComparePass compara pass con hash bcrypt
 func ComparePass(hash, pass string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(pass)) == nil
+}
+
+func FechaActualPeru() time.Time {
+	loc, _ := time.LoadLocation("America/Lima")
+	return time.Now().In(loc)
 }

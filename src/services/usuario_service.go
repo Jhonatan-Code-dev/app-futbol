@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"time"
 
 	"app-futbol/src/middlewares"
 	"app-futbol/src/schemas"
@@ -19,42 +18,34 @@ type UsuarioService struct {
 func NewUsuarioService(db *gorm.DB) *UsuarioService {
 	return &UsuarioService{DB: db}
 }
-
-// RequestRegister valida y registra un usuario
 func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) error {
-	// Validaciones usando validation con mensajes centralizados
 	if err := validation.ValidarNombreError(usuario.Nombre); err != nil {
-		return err
+		return fmt.Errorf("nombre: %s", err.Error())
 	}
 	if err := validation.ValidarApellidoError(usuario.Apellido); err != nil {
-		return err
+		return fmt.Errorf("apellido: %s", err.Error())
 	}
 	if err := validation.ValidarCorreoError(usuario.Correo); err != nil {
-		return err
+		return fmt.Errorf("correo: %s", err.Error())
 	}
 	if err := validation.ValidarPassError(usuario.Pass); err != nil {
-		return err
+		return fmt.Errorf("pass: %s", err.Error())
 	}
 
-	// Hashear contraseña
-	hash, err := validation.HashPass(usuario.Pass)
-	if err != nil {
+	// Hash de la contraseña
+	if hash, err := validation.HashPass(usuario.Pass); err != nil {
 		return err
+	} else {
+		usuario.Pass = hash
 	}
-	usuario.Pass = hash
 
-	// Asignar valores por defecto
+	// Valores por defecto
 	usuario.IDRol = 1
-	usuario.Estado = true
-	usuario.FechaSolicitud = time.Now()
-	usuario.FechaAceptacion = time.Now()
+	usuario.Estado = false
+	usuario.FechaSolicitud = validation.FechaActualPeru()
 
-	// Insertar en la base de datos
-	if err := s.DB.Create(usuario).Error; err != nil {
-		return err
-	}
-
-	return nil
+	// Crear usuario
+	return s.DB.Create(usuario).Error
 }
 
 func (s *UsuarioService) Login(correo, pass string) (string, error) {

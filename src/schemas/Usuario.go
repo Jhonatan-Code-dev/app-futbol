@@ -9,9 +9,9 @@ type Usuario struct {
 	Apellido  string `gorm:"type:varchar(100);not null"`
 	Correo    string `gorm:"type:varchar(255);unique;not null"`
 	Pass      string `gorm:"type:varchar(255);not null"`
-	Estado    bool   `gorm:"not null" json:"estado"`
+	Estado    bool   `gorm:"not null"`
 
-	FechaAceptacion time.Time `gorm:"type:datetime;not null"`
+	FechaAceptacion time.Time `gorm:"type:datetime"`
 	FechaSolicitud  time.Time `gorm:"type:datetime;not null"`
 
 	Rol Rol `gorm:"foreignKey:IDRol;references:IdRol"`
