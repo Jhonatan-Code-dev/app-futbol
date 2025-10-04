@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"app-futbol/src/helpers"
 	"app-futbol/src/schemas"
 	"app-futbol/src/services"
 	"app-futbol/src/validation"
@@ -19,32 +20,26 @@ func NewUsuarioController(service *services.UsuarioService) *UsuarioController {
 // SolicitarRegistro maneja POST /usuarios/solicitar
 func (c *UsuarioController) SolicitarRegistro(ctx *fiber.Ctx) error {
 	var usuario schemas.Usuario
-	if err := ctx.BodyParser(&usuario); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"estado": false,
-			"error":  "Datos inválidos: " + err.Error(),
-		})
+
+	// Parseamos el body
+	if err := helpers.ParseBody(ctx, &usuario); err != nil {
+		return err
 	}
 
+	// Lógica de negocio en el servicio
 	if err := c.Service.RequestRegister(&usuario); err != nil {
-		// Detectar error de validación (ErrorMap)
+		// Si es un error de validación
 		if em, ok := err.(validation.ErrorMap); ok {
 			return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"estado": false,
 				"errors": em,
 			})
 		}
-		// Otro tipo de error (DB, lógica, etc.)
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"estado": false,
-			"error":  err.Error(),
-		})
+		// Otro error inesperado
+		return helpers.JsonInternalError(ctx, err)
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"estado":  true,
-		"mensaje": "Solicitud de registro enviada correctamente",
-	})
+	return helpers.JsonSuccess(ctx, "Solicitud de registro enviada correctamente")
 }
 
 // Login maneja POST /usuarios/login
@@ -54,19 +49,14 @@ func (c *UsuarioController) Login(ctx *fiber.Ctx) error {
 		Password string `json:"password"`
 	}
 
-	if err := ctx.BodyParser(&body); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"estado": false,
-			"error":  "Datos inválidos: " + err.Error(),
-		})
+	// Usamos ParseBody para no repetir lógica
+	if err := helpers.ParseBody(ctx, &body); err != nil {
+		return err
 	}
 
 	token, err := c.Service.Login(body.Correo, body.Password)
 	if err != nil {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"estado": false,
-			"error":  err.Error(),
-		})
+		return helpers.JsonError(ctx, "Credenciales inválidas")
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{

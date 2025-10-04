@@ -28,27 +28,30 @@ func NewUsuarioService(db *gorm.DB) *UsuarioService {
 
 // RequestRegister solicita el registro de un usuario
 func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) error {
-	// Validar datos con ValidationService
+	// Validar datos con ValidationService (incluye regla "gmail")
 	errorsMap := validation.ErrorMap{}
 	if err := s.validator.ValidateStructInto(usuario, errorsMap); err != nil {
-		// Devolver errores amigables en formato JSON
 		return err
 	}
 
 	// Verificar si el correo ya está registrado
 	var existing schemas.Usuario
-	if err := s.DB.Where("correo = ?", usuario.Correo).First(&existing).Error; err == nil {
+	err := s.DB.Where("correo = ?", usuario.Correo).First(&existing).Error
+	if err == nil {
+		// Existe → error controlado
 		return fmt.Errorf("el correo %s ya está registrado", usuario.Correo)
-	} else if err != gorm.ErrRecordNotFound {
-		return err
+	} else if err != nil && err != gorm.ErrRecordNotFound {
+		// Error inesperado de DB
+		return fmt.Errorf("error al verificar correo: %w", err)
 	}
 
 	// Encriptar contraseña
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(usuario.Pass), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return fmt.Errorf("error al encriptar contraseña: %w", err)
 	}
 
+	// Completar datos de registro
 	usuario.Pass = string(hashedPass)
 	usuario.Estado = false
 	usuario.FechaSolicitud = time.Now()
@@ -56,7 +59,7 @@ func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) error {
 
 	// Guardar en la DB
 	if err := s.DB.Create(usuario).Error; err != nil {
-		return err
+		return fmt.Errorf("error al guardar usuario: %w", err)
 	}
 
 	return nil
@@ -67,18 +70,22 @@ func (s *UsuarioService) Login(correo, pass string) (string, error) {
 	var usuario schemas.Usuario
 	err := s.DB.Where("correo = ?", correo).First(&usuario).Error
 	if err != nil {
-		return "", fmt.Errorf("usuario no encontrado")
+		if err == gorm.ErrRecordNotFound {
+			return "", fmt.Errorf("usuario no encontrado")
+		}
+		return "", fmt.Errorf("error en la base de datos: %w", err)
 	}
 
 	if !usuario.Estado {
 		return "", fmt.Errorf("usuario no aprobado")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(usuario.Pass), []byte(pass))
-	if err != nil {
+	// Comparar contraseñas
+	if err := bcrypt.CompareHashAndPassword([]byte(usuario.Pass), []byte(pass)); err != nil {
 		return "", fmt.Errorf("contraseña incorrecta")
 	}
 
+	// Generar token
 	token, err := middlewares.GenerateToken(usuario.IdUsuario)
 	if err != nil {
 		return "", fmt.Errorf("no se pudo generar token")
