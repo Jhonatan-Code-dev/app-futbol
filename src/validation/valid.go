@@ -48,10 +48,13 @@ func ValidarPassError(pass string) error {
 	return nil
 }
 
-// HashPass genera hash bcrypt con costo 12
-func HashPass(pass string) (string, error) {
-	h, e := bcrypt.GenerateFromPassword([]byte(pass), 12)
-	return string(h), e
+func HashPass(pass string, hashOut *string) error {
+	h, err := bcrypt.GenerateFromPassword([]byte(pass), 12)
+	if err != nil {
+		return errors.New("no se pudo generar hash de contraseña")
+	}
+	*hashOut = string(h)
+	return nil
 }
 
 // ComparePass compara pass con hash bcrypt

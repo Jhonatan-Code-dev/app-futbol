@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"strings"
 
 	"app-futbol/src/middlewares"
 	"app-futbol/src/schemas"
@@ -34,29 +35,28 @@ func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) map[string]st
 		errores["pass"] = err.Error()
 	}
 
+	var count int64
+	s.DB.Model(&schemas.Usuario{}).
+		Where("correo = ?", strings.TrimSpace(strings.ToLower(usuario.Correo))).
+		Count(&count)
+	if count > 0 {
+		errores["correo"] = "correo ya registrado"
+	}
+
+	var hash string
+	if err := validation.HashPass(usuario.Pass, &hash); err != nil {
+		errores["pass"] = err.Error()
+		return errores
+	}
+
 	if len(errores) > 0 {
 		return errores
 	}
-
-	// Hash contraseña
-	hash, err := validation.HashPass(usuario.Pass)
-	if err != nil {
-		errores["pass"] = "error al generar hash"
-		return errores
-	}
 	usuario.Pass = hash
-
-	// Valores por defecto
 	usuario.IDRol = 1
 	usuario.Estado = false
 	usuario.FechaSolicitud = validation.FechaActualPeru()
-
-	// Crear usuario en DB
-	if err := s.DB.Create(usuario).Error; err != nil {
-		errores["db"] = err.Error()
-		return errores
-	}
-
+	s.DB.Create(usuario)
 	return nil
 }
 
