@@ -26,10 +26,18 @@ func (c *UsuarioController) SolicitarRegistro(ctx *fiber.Ctx) error {
 		})
 	}
 
+	// Solo considerar los campos que realmente recibimos
+	usuario = &schemas.Usuario{
+		Nombre:   usuario.Nombre,
+		Apellido: usuario.Apellido,
+		Correo:   usuario.Correo,
+		Pass:     usuario.Pass,
+	}
+
 	if errores := c.Service.RequestRegister(usuario); errores != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"success": false,
-			"errores": errores, // aquí salen los campos y sus mensajes
+			"errores": errores,
 		})
 	}
 
