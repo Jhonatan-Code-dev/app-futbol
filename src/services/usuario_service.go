@@ -31,7 +31,6 @@ func (s *UsuarioService) RequestRegister(usuario *schemas.Usuario) map[string]st
 	usuario.IDRol = 1
 	usuario.Estado = false
 	usuario.FechaSolicitud = validation.FechaActualPeru()
-	// Crear usuario con manejo seguro de errores
 	if err := s.DB.Create(usuario).Error; err != nil {
 		helpers.SafeError(errores, "db", err)
 		return errores

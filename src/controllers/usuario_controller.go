@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"app-futbol/src/helpers"
 	"app-futbol/src/schemas"
 	"app-futbol/src/services"
 
@@ -18,25 +19,16 @@ func NewUsuarioController(service *services.UsuarioService) *UsuarioController {
 func (c *UsuarioController) SolicitarRegistro(ctx *fiber.Ctx) error {
 	usuario := new(schemas.Usuario)
 	if err := ctx.BodyParser(usuario); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"message": "Datos inválidos",
-		})
+		return helpers.Fail(ctx, fiber.StatusBadRequest, "Datos inválidos")
 	}
-	usuario = &schemas.Usuario{
+	usuarioData := &schemas.Usuario{
 		Nombre:   usuario.Nombre,
 		Apellido: usuario.Apellido,
 		Correo:   usuario.Correo,
 		Pass:     usuario.Pass,
 	}
-	if errores := c.Service.RequestRegister(usuario); errores != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"success": false,
-			"errores": errores,
-		})
+	if errores := c.Service.RequestRegister(usuarioData); errores != nil {
+		return helpers.FailWithErrors(ctx, fiber.StatusBadRequest, errores)
 	}
-	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": true,
-		"message": "Usuario registrado correctamente",
-	})
+	return helpers.Success(ctx, fiber.StatusCreated, "Usuario registrado correctamente")
 }
